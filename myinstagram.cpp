@@ -1,49 +1,60 @@
 #include<iostream>
-#include<string>
-#include<vector>
-using namespace std;
+#include<map>
+#include<fstream>
 
-class Account {
-private:
+using namespace std;
+class Account{
+    private:
+    long userid;
     string firstname;
     string lastname;
     string username;
-    string password; 
-    
-public:
-
-    static long userid;
-    long   getUserId() { return userid; }
-    string getFirstName() { return firstname; }
-    string getLastName() { return lastname; }
-    string getUserName() { return username; }
-    string getPassword() { return password; } 
-    void create_account(string fname, string lname, string uname, string pward); 
+    static long nextuserid;
+    public:
+    Account(){}
+    Account(string fname, string lname, string uname);
+    long getuserid(){return userid;};
+    string getfirstname(){return firstname;};
+    string getlastname(){return lastname;};
+    string getusername(){return username;};
+    void addpost( long userid,long postid);
+    void upload_story(long userid ,long storyid);
+    void follow(long userid1,long userid2);
+    void unfollow(long userid1 ,long userid2);
+    static void setlastuserid(long userid);
+    static long getlastuserid();
+    friend ofstream & operator<<(ofstream &ofs,Account &acc);
+    friend ifstream & operator>>(ifstream &ifs,Account &acc);
+    friend ostream & operator<<(ostream &os,Account &acc);
 };
-long Account::userid = 2039;
-ostream& operator<<(ostream& os, Account& acc) {
-    os << "First Name: " << acc.getFirstName() << endl;
-    os << "Last Name: " << acc.getLastName() << endl;
-    os << "User Name: " << acc.getUserName() << endl;
-    os << "Password: " << acc.getPassword() << endl; 
-    os << "UserId: " << acc.getUserId() << endl;
-    
-    return os;
-}
-
+long Account:: nextuserid=2039;
+class Instagram {
+    private:
+    map<long,Account>accounts;
+    public:
+    Instagram();
+    Account create_account(string fname, string lname, string uname);
+    Account addpost(long userid);
+    Account upload_story( long userid, long storyid);
+    Account follow( long userid, long userid1);
+    Account unfollow( long userid, long userid1);
+    void showallaccounts();
+    ~Instagram();
+};
 int main() {
+    Instagram b;
     Account acc;
     int choice;
-    // long UsserId,PostId;
-    string fname, lname, uname, pward;
+    // long  userid,userid1,storyid;
+    string fname, lname, uname;
     cout << "***INSTAGRAM***" << endl;
     do {
         cout << "\n\tSelect one option below ";
         cout << "\n\t1 Create an Account"; 
-        cout << "\n\t2 See Post"; 
-        cout << "\n\t3 Add a post"; 
-        cout << "\n\t4 Delete a Post"; 
-        cout << "\n\t5 Delete an Account"; 
+        cout << "\n\t2 Add Post"; 
+        cout << "\n\t3 Upload story"; 
+        cout << "\n\t4 Follow an Account"; 
+        cout << "\n\t5 Unfollow  an Account"; 
         cout << "\n\t6 Show All Accounts";
         cout << "\n\t7 Quit";
         cout << "\nEnter your choice: ";
@@ -56,21 +67,151 @@ int main() {
             cin >> lname;
             cout << "Enter User Name: "; 
             cin >> uname;
-            cout << "Enter Password: "; 
-            cin >> pward;
-            acc.create_account(fname, lname, uname, pward);
+            acc=b.create_account(fname, lname, uname);
             cout << endl << "Congratulations! Account is Created" << endl;
             cout << acc; 
             break;
-        
+        // case 2:
+        //     cout<<"Enter Your UserId:";
+        //     cin>>userid;
+        //     acc=b.addpost(userid  );
+        //     cout<<endl<<"Your Post is Added"<<endl;
+        //     cout<<acc;
+        //     break;
+        // case 3:
+        //     cout<<"Enter userid:";
+        //     cin>>userid;
+        //     cout<<"Enter storyid:";
+        //     cin>>storyid;
+        //     acc=b.upload_story(userid, storyid);
+        //     cout<<endl<<"Story is Uploaded"<<endl;
+        //     cout<<acc;
+            
+        //     break;
+        // case 4:
+        //     cout<<"Enter your Userid:";
+        //     cin>>userid;
+        //     cout<<"Enter Others userid :";
+        //     cin>>userid1;
+        //     acc=b.follow(userid, userid1);
+        //     cout<<endl<<"You start folowing "<<userid1<<endl;
+        //     cout<<acc;
+        //     break;
+        // case 5:
+        //     cout<<"Enter your Userid:";
+        //     cin>>userid;
+        //     cout<<"Enter Others userid :";
+        //     cin>>userid1;
+        //     acc=b.unfollow(userid, userid1);
+        //     cout<<endl<<"You Unfollow "<<userid1<<endl;
+        //     cout<<acc;
+        //     break;
+        case 6:
+            b.showallaccounts();
+            break;
+        case 7:
+             break;
+        default:
+            cout<<"\nEnter corret choice";
+            exit(0);
         }
     } while (choice != 7); 
     return 0;
 }
- void Account::create_account(string fname, string lname, string uname, string pward) {
-        firstname = fname;
-        lastname = lname;
-        username = uname;
-        password = pward; 
-        userid++;
-  }
+Account::Account(string fname,string lname,string uname)
+{
+ nextuserid++;
+ userid=nextuserid;
+ firstname=fname;
+ lastname=lname;
+ username=uname;
+}
+void Account::setlastuserid(long userid)
+{
+ nextuserid=userid;
+}
+long Account::getlastuserid()
+{
+ return nextuserid;
+}
+ofstream & operator<<(ofstream &ofs,Account &acc)
+{
+ ofs<<acc.userid<<endl;
+ ofs<<acc.firstname<<endl;
+ ofs<<acc.lastname<<endl;
+ ofs<<acc.username<<endl;
+ return ofs;
+}
+ifstream & operator>>(ifstream &ifs,Account &acc)
+{
+ ifs>>acc.userid;
+ ifs>>acc.firstname;
+ ifs>>acc.lastname;
+ ifs>>acc.username;
+ return ifs;
+ 
+}
+ostream & operator<<(ostream &os,Account &acc)
+{
+ os<<"User Id:"<<acc.getuserid()<<endl;
+ os<<"First Name:"<<acc.getfirstname()<<endl;
+ os<<"Last Name:"<<acc.getlastname()<<endl;
+ os<<"User Name:"<<acc.getusername()<<endl;
+ return os;
+}
+Instagram::Instagram()
+{
+ Account account;
+ ifstream infile;
+ infile.open("Insta.data");
+ if(!infile)
+ {
+ //cout<<"Error in Opening! File Not Found!!"<<endl;
+ return;
+ }
+ while(!infile.eof())
+ {
+ infile>>account;
+ accounts.insert(pair<long,Account>(account.getuserid(),account));
+ }
+ Account::setlastuserid(account.getuserid());
+ 
+ infile.close();
+ 
+}
+Account Instagram::create_account(string fname,string lname,string uname)
+{
+ ofstream outfile;
+ Account account(fname,lname,uname);
+ accounts.insert(pair<long,Account>(account.getuserid(),account));
+ 
+ outfile.open("Insta.data", ios::trunc);
+ 
+ map<long,Account>::iterator itr;
+ for(itr=accounts.begin();itr!=accounts.end();itr++)
+ {
+ outfile<<itr->second;
+ }
+ outfile.close();
+ return account;
+}
+void Instagram::showallaccounts()
+{
+ map<long,Account>::iterator itr;
+ for(itr=accounts.begin();itr!=accounts.end();itr++)
+ {
+ cout<<"Account "<<itr->first<<endl<<itr->second<<endl;
+ }
+}
+Instagram::~Instagram()
+{
+ ofstream outfile;
+ outfile.open("insta.data", ios::trunc);
+ 
+ map<long,Account>::iterator itr;
+ for(itr=accounts.begin();itr!=accounts.end();itr++)
+ {
+ outfile<<itr->second;
+ }
+ outfile.close();
+}
