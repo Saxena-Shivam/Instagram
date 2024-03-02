@@ -2,6 +2,7 @@
 #include<map>
 #include<fstream>
 #include<list>
+#include<algorithm>
 using namespace std;
 class Account{
     private:
@@ -13,6 +14,8 @@ class Account{
     public:
     list<long>postcontainer;
     list<long>storycontaner;
+    list<long>following;
+    list<long>followers;
     Account(){}
     Account(string fname, string lname, string uname);
     long getuserid(){return userid;};
@@ -21,6 +24,8 @@ class Account{
     string getusername(){return username;};
     void addpost(long postid);
     void addstory(long storyid);
+    void getfollowers();
+    void getfollowings();
     void getposts();
     void getstories();
     void follow(long userid1,long userid2);
@@ -40,8 +45,8 @@ class Instagram {
     Account create_account(string fname, string lname, string uname);
     Account addpost(long userid ,long postid);
     Account upload_story( long userid, long storyid);
-    // Account follow( long userid, long userid1);
-    // Account unfollow( long userid, long userid1);
+    Account follow( long userid, long userid1);
+    Account unfollow( long userid, long userid1);
     void showallaccounts();
     ~Instagram();
 };
@@ -94,28 +99,28 @@ int main() {
             cout<<acc;
             
             break;
-        // case 4:
-        //     cout<<"Enter your Userid:";
-        //     cin>>userid;
-        //     cout<<"Enter Others userid :";
-        //     cin>>userid1;
-        //     acc=b.follow(userid, userid1);
-        //     cout<<endl<<"You start folowing "<<userid1<<endl;
-        //     cout<<acc;
-        //     break;
-        // case 5:
-        //     cout<<"Enter your Userid:";
-        //     cin>>userid;
-        //     cout<<"Enter Others userid :";
-        //     cin>>userid1;
-        //     acc=b.unfollow(userid, userid1);
-        //     cout<<endl<<"You Unfollow "<<userid1<<endl;
-        //     cout<<acc;
-        //     break;
+        case 4:
+            cout<<"Enter your Userid:";
+            cin>>userid;
+            cout<<"Enter Others userid :";
+            cin>>userid1;
+            acc=b.follow(userid, userid1);
+            cout<<endl<<"You start folowing "<<userid1<<endl;
+            cout<<acc;
+            break;
+        case 5:
+            cout<<"Enter your Userid:";
+            cin>>userid;
+            cout<<"Enter Others userid :";
+            cin>>userid1;
+            acc=b.unfollow(userid, userid1);
+            cout<<endl<<"You Unfollow "<<userid1<<endl;
+            cout<<acc;
+            break;
         case 6:
             b.showallaccounts();
             break;
-        case 7:
+        case 7:   
              break;
         default:
             cout<<"\nEnter corret choice";
@@ -140,23 +145,68 @@ long Account::getlastuserid()
 {
  return nextuserid;
 }
-ofstream & operator<<(ofstream &ofs,Account &acc)
-{
- ofs<<acc.userid<<endl;
- ofs<<acc.firstname<<endl;
- ofs<<acc.lastname<<endl;
- ofs<<acc.username<<endl;
- return ofs;
+ofstream & operator<<(ofstream &ofs, Account &acc) {
+    ofs << acc.userid << endl;
+    ofs << acc.firstname << endl;
+    ofs << acc.lastname << endl;
+    ofs << acc.username << endl;
+    ofs << acc.postcontainer.size() << endl;
+    for (long postid : acc.postcontainer) {
+        ofs << postid << " ";
+    }
+    ofs << endl;
+    ofs << acc.storycontaner.size() << endl;
+    for (long storyid : acc.storycontaner) {
+        ofs << storyid << " ";
+    }
+    ofs << endl;
+    ofs << acc.followers.size() << endl;
+    for (long followerid : acc.followers) {
+        ofs << followerid << " ";
+    }
+    ofs << endl;
+    ofs << acc.following.size() << endl;
+    for (long followingid : acc.following) {
+        ofs << followingid << " ";
+    }
+    ofs << endl;
+    return ofs;
 }
-ifstream & operator>>(ifstream &ifs,Account &acc)
-{
- ifs>>acc.userid;
- ifs>>acc.firstname;
- ifs>>acc.lastname;
- ifs>>acc.username;
- return ifs;
- 
+
+ifstream & operator>>(ifstream &ifs, Account &acc) {
+    ifs >> acc.userid;
+    ifs >> acc.firstname;
+    ifs >> acc.lastname;
+    ifs >> acc.username;
+    long size;
+    long id;
+    acc.postcontainer.clear();
+    ifs >> size;
+    for (int i = 0; i < size; ++i) {
+        ifs >> id;
+        acc.postcontainer.push_back(id);
+    }
+    acc.storycontaner.clear();
+    ifs >> size;
+    for (int i = 0; i < size; ++i) {
+        ifs >> id;
+        acc.storycontaner.push_back(id);
+    }
+    acc.followers.clear();
+    ifs >> size;
+    for (int i = 0; i < size; ++i) {
+        ifs >> id;
+        acc.followers.push_back(id);
+    }
+    acc.following.clear();
+    ifs >> size;
+    for (int i = 0; i < size; ++i) {
+        ifs >> id;
+        acc.following.push_back(id);
+    }
+    return ifs;
 }
+
 ostream & operator<<(ostream &os,Account &acc)
 {
  os<<"User Id:"<<acc.getuserid()<<endl;
@@ -166,9 +216,15 @@ ostream & operator<<(ostream &os,Account &acc)
  os << "Posts: ";
     acc.getposts();
     os << endl;
-    os << "Stories: "; acc.getstories();
+ os << "Stories: ";
+    acc.getstories();
     os << endl;
-    return os;
+ os << "followers: ";
+    acc.getfollowers();
+    os << endl;
+ os << "Following: "; 
+    acc.getfollowings();
+    os << endl;  
  return os;
 }
 Instagram::Instagram()
@@ -258,4 +314,55 @@ void Account::getstories() {
     for (list<long>::iterator it = storycontaner.begin(); it != storycontaner.end(); ++it) {
         cout << *it << " ";
     }
+}
+void Account::getfollowers() {
+    for (list<long>::iterator it = followers.begin(); it != followers.end(); ++it) {
+        cout << *it << " ";
+    }
+}
+void Account::getfollowings() {
+    for (list<long>::iterator it = following.begin(); it != following.end(); ++it) {
+        cout << *it << " ";
+    }
+}
+Account Instagram::follow(long userid, long userid1) {
+    map<long, Account>::iterator itr1 = accounts.find(userid);
+    map<long, Account>::iterator itr2 = accounts.find(userid1);
+    if (itr1 == accounts.end() || itr2 == accounts.end()) {
+        cout << "Invalid user IDs." << endl;
+        return Account();
+    }
+    if (find(itr1->second.following.begin(), itr1->second.following.end(), userid1) != itr1->second.following.end()) {
+        cout << "You are already following user with ID " << userid1 << "." << endl;
+        return Account();
+    }
+    itr1->second.following.push_back(userid1);
+    itr2->second.followers.push_back(userid);
+
+    cout << "You are now following user with ID " << userid1 << "." << endl;
+
+    return itr1->second;
+}
+
+Account Instagram::unfollow(long userid, long userid1) {
+    map<long, Account>::iterator itr1 = accounts.find(userid);
+    map<long, Account>::iterator itr2 = accounts.find(userid1);
+    if (itr1 == accounts.end() || itr2 == accounts.end()) {
+        cout << "Invalid user IDs." << endl;
+        return Account();
+    }
+    auto it = find(itr1->second.following.begin(), itr1->second.following.end(), userid1);
+    if (it == itr1->second.following.end()) {
+        cout << "You are not following user with ID " << userid1 << "." << endl;
+        return Account();
+    }
+    itr1->second.following.erase(it);
+    it = find(itr2->second.followers.begin(), itr2->second.followers.end(), userid);
+    if (it != itr2->second.followers.end()) {
+        itr2->second.followers.erase(it);
+    }
+
+    cout << "You have unfollowed user with ID " << userid1 << "." << endl;
+
+    return itr1->second;
 }
