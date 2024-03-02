@@ -28,15 +28,15 @@ class Account{
     void getfollowings();
     void getposts();
     void getstories();
-    void follow(long userid1,long userid2);
-    void unfollow(long userid1 ,long userid2);
+    // void follow(long userid1,long userid2);
+    // void unfollow(long userid1 ,long userid2);
     static void setlastuserid(long userid);
     static long getlastuserid();
     friend ofstream & operator<<(ofstream &ofs,Account &acc);
     friend ifstream & operator>>(ifstream &ifs,Account &acc);
     friend ostream & operator<<(ostream &os,Account &acc);
 };
-long Account:: nextuserid=2039;
+long Account:: nextuserid=1000;
 class Instagram {
     private:
     map<long,Account>accounts;
@@ -47,6 +47,8 @@ class Instagram {
     Account upload_story( long userid, long storyid);
     Account follow( long userid, long userid1);
     Account unfollow( long userid, long userid1);
+    list<long> getStories(int userId);
+    list<long> getpost(int userid);
     void showallaccounts();
     ~Instagram();
 };
@@ -65,7 +67,9 @@ int main() {
         cout << "\n\t4 Follow an Account"; 
         cout << "\n\t5 Unfollow  an Account"; 
         cout << "\n\t6 Show All Accounts";
-        cout << "\n\t7 Quit";
+        cout << "\n\t7 Show Stories in Feed";
+        cout << "\n\t8 Show Post in Feed";
+        cout << "\n\t9 Quit";
         cout << "\nEnter your choice: ";
         cin >> choice;
         switch (choice) {
@@ -97,7 +101,6 @@ int main() {
             acc=b.upload_story(userid, storyid);
             cout<<endl<<"Story is Uploaded"<<endl;
             cout<<acc;
-            
             break;
         case 4:
             cout<<"Enter your Userid:";
@@ -120,13 +123,37 @@ int main() {
         case 6:
             b.showallaccounts();
             break;
-        case 7:   
+        case 7:
+            cout << "Enter User ID: ";
+            cin >> userid;
+            {
+                list<long> userStories = b.getStories(userid);
+                cout << "Stories for User " << userid << " in Feed:" << endl;
+                for (long storyId : userStories) {
+                    cout << storyId << " ";
+                }
+                cout << endl;
+            }
+            break;   
+        case 8:
+            cout << "Enter User ID: ";
+            cin >> userid;
+            {
+                list<long> userpost = b.getpost(userid);
+                cout << "post for User " << userid << " in Feed:" << endl;
+                for (long postid : userpost) {
+                    cout << postid << " ";
+                }
+                cout << endl;
+            }
+            break;          
+        case 9:   
              break;
         default:
             cout<<"\nEnter corret choice";
             exit(0);
         }
-    } while (choice != 7); 
+    } while (choice != 9); 
     return 0;
 }
 Account::Account(string fname,string lname,string uname)
@@ -234,7 +261,7 @@ Instagram::Instagram()
  infile.open("Insta.data");
  if(!infile)
  {
- //cout<<"Error in Opening! File Not Found!!"<<endl;
+//  cout<<"Error in Opening! File Not Found!!"<<endl;
  return;
  }
  while(!infile.eof())
@@ -243,9 +270,7 @@ Instagram::Instagram()
  accounts.insert(pair<long,Account>(account.getuserid(),account));
  }
  Account::setlastuserid(account.getuserid());
- 
  infile.close();
- 
 }
 Account Instagram::create_account(string fname,string lname,string uname)
 {
@@ -365,4 +390,38 @@ Account Instagram::unfollow(long userid, long userid1) {
     cout << "You have unfollowed user with ID " << userid1 << "." << endl;
 
     return itr1->second;
+}
+list<long> Instagram::getStories(int userId) {
+    list<long> userFeedStories;
+    map<long, Account>::iterator itr = accounts.find(userId);
+    if (itr != accounts.end()) {
+        userFeedStories.insert(userFeedStories.begin(), itr->second.storycontaner.begin(), itr->second.storycontaner.end()); 
+        for (long followingId : itr->second.following) {
+            map<long, Account>::iterator followingItr = accounts.find(followingId);
+            if (followingItr != accounts.end()) {
+                userFeedStories.insert(userFeedStories.begin(), followingItr->second.storycontaner.begin(), followingItr->second.storycontaner.end());
+            }
+        }
+        userFeedStories.sort(); 
+    } else {
+        cout << "User with ID " << userId << " not found." << endl;
+    }
+    return userFeedStories;
+}
+list<long> Instagram::getpost(int userId) {
+    list<long> userFeedpost;
+    map<long, Account>::iterator itr = accounts.find(userId);
+    if (itr != accounts.end()) {
+        userFeedpost.insert(userFeedpost.begin(), itr->second.postcontainer.begin(), itr->second.postcontainer.end()); 
+        for (long followingId : itr->second.following) {
+            map<long, Account>::iterator followingItr = accounts.find(followingId);
+            if (followingItr != accounts.end()) {
+                userFeedpost.insert(userFeedpost.begin(), followingItr->second.postcontainer.begin(), followingItr->second.postcontainer.end());
+            }
+        }  
+        userFeedpost.sort(); 
+    } else {
+        cout << "User with ID " << userId << " not found." << endl;
+    }
+    return userFeedpost;
 }
