@@ -1,7 +1,7 @@
 #include<iostream>
 #include<map>
 #include<fstream>
-
+#include<list>
 using namespace std;
 class Account{
     private:
@@ -11,14 +11,18 @@ class Account{
     string username;
     static long nextuserid;
     public:
+    list<long>postcontainer;
+    list<long>storycontaner;
     Account(){}
     Account(string fname, string lname, string uname);
     long getuserid(){return userid;};
     string getfirstname(){return firstname;};
     string getlastname(){return lastname;};
     string getusername(){return username;};
-    void addpost( long userid,long postid);
-    void upload_story(long userid ,long storyid);
+    void addpost(long postid);
+    void addstory(long storyid);
+    void getposts();
+    void getstories();
     void follow(long userid1,long userid2);
     void unfollow(long userid1 ,long userid2);
     static void setlastuserid(long userid);
@@ -34,10 +38,10 @@ class Instagram {
     public:
     Instagram();
     Account create_account(string fname, string lname, string uname);
-    Account addpost(long userid);
+    Account addpost(long userid ,long postid);
     Account upload_story( long userid, long storyid);
-    Account follow( long userid, long userid1);
-    Account unfollow( long userid, long userid1);
+    // Account follow( long userid, long userid1);
+    // Account unfollow( long userid, long userid1);
     void showallaccounts();
     ~Instagram();
 };
@@ -45,7 +49,7 @@ int main() {
     Instagram b;
     Account acc;
     int choice;
-    // long  userid,userid1,storyid;
+    long  userid,userid1,storyid,postid;
     string fname, lname, uname;
     cout << "***INSTAGRAM***" << endl;
     do {
@@ -71,23 +75,25 @@ int main() {
             cout << endl << "Congratulations! Account is Created" << endl;
             cout << acc; 
             break;
-        // case 2:
-        //     cout<<"Enter Your UserId:";
-        //     cin>>userid;
-        //     acc=b.addpost(userid  );
-        //     cout<<endl<<"Your Post is Added"<<endl;
-        //     cout<<acc;
-        //     break;
-        // case 3:
-        //     cout<<"Enter userid:";
-        //     cin>>userid;
-        //     cout<<"Enter storyid:";
-        //     cin>>storyid;
-        //     acc=b.upload_story(userid, storyid);
-        //     cout<<endl<<"Story is Uploaded"<<endl;
-        //     cout<<acc;
+         case 2:
+            cout << "Enter Your UserId: ";
+                cin >> userid;
+                cout << "Enter your Post id: ";
+                cin >> postid;
+                acc = b.addpost(userid, postid);
+                cout << endl << "Your Post is Added" << endl;
+                cout << acc;
+                break;
+        case 3:
+            cout<<"Enter userid:";
+            cin>>userid;
+            cout<<"Enter storyid:";
+            cin>>storyid;
+            acc=b.upload_story(userid, storyid);
+            cout<<endl<<"Story is Uploaded"<<endl;
+            cout<<acc;
             
-        //     break;
+            break;
         // case 4:
         //     cout<<"Enter your Userid:";
         //     cin>>userid;
@@ -157,6 +163,12 @@ ostream & operator<<(ostream &os,Account &acc)
  os<<"First Name:"<<acc.getfirstname()<<endl;
  os<<"Last Name:"<<acc.getlastname()<<endl;
  os<<"User Name:"<<acc.getusername()<<endl;
+ os << "Posts: ";
+    acc.getposts();
+    os << endl;
+    os << "Stories: "; acc.getstories();
+    os << endl;
+    return os;
  return os;
 }
 Instagram::Instagram()
@@ -214,4 +226,36 @@ Instagram::~Instagram()
  outfile<<itr->second;
  }
  outfile.close();
+}
+
+Account Instagram::addpost(long userid, long postid) {
+    map<long, Account>::iterator itr = accounts.find(userid);
+    itr->second.addpost(postid);
+    return itr->second;
+}
+
+Account Instagram::upload_story(long userid, long storyid) {
+    map<long, Account>::iterator itr = accounts.find(userid);
+    itr->second.addstory(storyid);
+    return itr->second;
+}
+
+void Account::addpost(long postid) {
+    postcontainer.push_back(postid);
+}
+
+void Account::addstory(long storyid) {
+    storycontaner.push_back(storyid);
+}
+
+void Account::getposts() {
+    for (list<long>::iterator it = postcontainer.begin(); it != postcontainer.end(); ++it) {
+        cout << *it << " ";
+    }
+}
+
+void Account::getstories() {
+    for (list<long>::iterator it = storycontaner.begin(); it != storycontaner.end(); ++it) {
+        cout << *it << " ";
+    }
 }
